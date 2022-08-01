@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: IRIS current file",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "type": "objectscript",
+      "request": "launch",
+      "name": "ObjectScript Debug Class",
+      "program": "##class(PackageSample.ObjectScript).Test()",
+    },
+    {
+      "type": "objectscript",
+      "request": "attach",
+      "name": "ObjectScript Attach",
+      "processId": "${command:PickProcess}",
+      "system": true
+    }
+  ]
+}

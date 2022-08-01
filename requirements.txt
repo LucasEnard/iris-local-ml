@@ -1,0 +1,4 @@
+requests==2.27.1
+transformers==4.21.0
+#torch==1.12.0
+clint==0.5.1
