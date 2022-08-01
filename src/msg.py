@@ -10,3 +10,11 @@ class HFRequest(Message):
 class HFResponse(Message):
     payload:str = None
 
+@dataclass()
+class MLRequest(Message):
+    input:str = None
+
+@dataclass()
+class MLResponse(Message):
+    logits:str = None
+

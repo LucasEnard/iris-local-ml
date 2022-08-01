@@ -14,17 +14,13 @@
 
 #-----------------------------
 
-# from transformers import AutoTokenizer, AutoModelForCausalLM
-
-# tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-j-6B")
-
-# model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B")
-
-
-# text = "In a hole in the ground there lived"
-# input = tokenizer(text)
-# output = model(input)
-# print(output)
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2-large',cache_dir="./src/model/gpt2-large-tok")
+model = GPT2LMHeadModel.from_pretrained('gpt2-large', pad_token_id = tokenizer.eos_token_id, cache_dir="./src/model/gpt2-large-mod")
+text = "And so was the story of"
+encoded_input = tokenizer.encode(text, return_tensors='pt')
+output = model.generate(encoded_input, max_length = 10000, num_beams = 5, no_repeat_ngram_size  = 2, early_stopping = True)
+print(tokenizer.decode(output[0],skip_special_tokens=True))
 
 #-----------------------------
 
@@ -66,4 +62,8 @@
 
 # ("\r[%s%s]" % ('x' * done, '-' * (25-done)) )
 
-print(1E-10)
+#--------------------------------------
+
+# import os
+# os.system('time tar -I zstd -xf src/model/step_383500_slim.tar.zstd')
+

@@ -7,14 +7,6 @@ RUN pip3 install -r requirements.txt
 FROM build
 
 USER root
-# ADD https://www.cyberciti.biz/files/sticker/sticker_book.pdf /output.pdf
-# ADD /output.pdf /irisdev/app/model/output.pdf
-
-# RUN apt-get update
-# RUN apt-get install -y curl
-# RUN curl https://the-eye.eu/public/AI/GPT-J-6B/step_383500_slim.tar.zstd \
-#   | tar -xjC --use-compress-program=unzstd /irisdev/app/model/ step_383500_slim.tar.zstd \
-#   && make -C /irisdev/app/model/ step_383500_slim.tar.zstd
 
 WORKDIR /irisdev/app
 RUN chown ${ISC_PACKAGE_MGRUSER}:${ISC_PACKAGE_IRISGROUP} /irisdev/app
