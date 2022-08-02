@@ -102,6 +102,7 @@ msg.MLRequest
     "num_return_sequences":3
 }
 ```
+Click `Invoke Testing Service` and wait for the model to operate.<br>
 Now you can click on `Visual Trace` to see in details what happened and see the logs.
 
 
@@ -120,8 +121,8 @@ purpose=text-generation
 ```
 Here, `purpose` takes as an argument the `TASK` or the `PURPOSE` of your model.
 
-Now you can double-click on the operation `Python.MLOperation` and `start` it.
-**You must see in the `Log` part the starting of your model and the downloading.**
+Now you can double-click on the operation `Python.MLOperation` and `start` it.<br>
+**You must see in the `Log` part the starting of your model and the downloading.**<br>
 **NOTE** You can refresh those logs every x seconds to see the advancement with the downloads.
 
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
@@ -146,11 +147,12 @@ msg.MLRequest
     "num_return_sequences":3
 }
 ```
+Click `Invoke Testing Service` and wait for the model to operate.<br>
 Now you can click on `Visual Trace` to see in details what happened and see the logs.
 
 **NOTE** that once the model was downloaded once, the production won't download it again but get the cached files found at `src/model/TheModelName/`.<br>
 If some files are missing, the Production will download them again.
 
 # 5. Conclusion
-From here you should be able to use any model that you need or own on IRIS.
+From here you should be able to use any model that you need or own on IRIS.<br>
 **NOTE** that you can create a `Python.MLOperation` for each of your model and have them on at the same time. 
