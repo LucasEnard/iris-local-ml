@@ -62,6 +62,12 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 **NOTE** that you can change the url to try any other models from HuggingFace, you may need to change the payload.
 
+See as example:<br>
+![sending hf req](https://user-images.githubusercontent.com/77791586/182403526-0f6e97a0-2019-4d86-b1ae-38c56dfc8746.png)
+![hf req](https://user-images.githubusercontent.com/77791586/182403515-7c6c2075-bdb6-46cd-9258-ac251844d591.png)
+![hf resp](https://user-images.githubusercontent.com/77791586/182403522-5e2f962f-2de0-40d3-8120-f2f3fcb74759.png)
+
+
 # 4. Use any model from the web
 In the section we will teach you how to use almost any model from the internet, HuggingFace or not.
 
@@ -106,8 +112,16 @@ msg.MLRequest
 }
 ```
 Click `Invoke Testing Service` and wait for the model to operate.<br>
+
+See for example:<br>
+![sending ml req](https://user-images.githubusercontent.com/77791586/182402707-13ca90d0-ad5a-4934-8923-a58fe821e00e.png)
+
 Now you can click on `Visual Trace` to see in details what happened and see the logs.
 
+See for example :<br>
+![ml req](https://user-images.githubusercontent.com/77791586/182402878-e34b64de-351c-49c3-affe-023cd885e04b.png)
+
+![ml resp](https://user-images.githubusercontent.com/77791586/182402932-4afd14fe-5f57-4b03-b0a6-1c6b74474015.png)
 
 ## 4.2. SECOND CASE : YOU WANT TO DOWNLOAD A MODEL FROM HUGGINGFACE
 In this case, you must find the URL of the model on HuggingFace;
@@ -139,11 +153,14 @@ task=fill-mask
 ```
 
 **NOTE** that any settings that are not `name` or `model_url` will go into the PIPELINE settings, so in our second example, the camembert-ner pipeline requirers an `aggregation_strategy` and a `task` that are specified here while the gpt2 requirers only a `task`.
-
+See as example:<br>
+![settings ml ope2](https://user-images.githubusercontent.com/77791586/182403258-c24efb77-2696-4462-ae71-9184667ac9e4.png)
 
 Now you can double-click on the operation `Python.MLOperation` and `start` it.<br>
 **You must see in the `Log` part the starting of your model and the downloading.**<br>
 **NOTE** You can refresh those logs every x seconds to see the advancement with the downloads.
+![dl in real time](https://user-images.githubusercontent.com/77791586/182403064-856724b5-876e-460e-a2b4-34eb63f44673.png
+
 
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
 
@@ -187,6 +204,11 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 **NOTE** that once the model was downloaded once, the production won't download it again but get the cached files found at `src/model/TheModelName/`.<br>
 If some files are missing, the Production will download them again.
+
+See as example:<br>
+![sending ml req](https://user-images.githubusercontent.com/77791586/182402707-13ca90d0-ad5a-4934-8923-a58fe821e00e.png)
+![ml req](https://user-images.githubusercontent.com/77791586/182402878-e34b64de-351c-49c3-affe-023cd885e04b.png)
+![ml resp](https://user-images.githubusercontent.com/77791586/182402932-4afd14fe-5f57-4b03-b0a6-1c6b74474015.png)
 
 # 5. TroubleShooting
 
