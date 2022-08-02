@@ -1,19 +1,19 @@
-from charset_normalizer import from_path
-import transformers
 from grongier.pex import BusinessOperation
+
 from msg import HFRequest,HFResponse,MLRequest,MLResponse
 
 from os.path import exists
+from os import mkdir
+
 import json
 import requests
-#import tensorflow as tf
-import transformers
-from transformers import TFAutoModel,AutoTokenizer
+
+from bs4 import BeautifulSoup as BS
+
+from transformers import pipeline
 
 class HFOperation(BusinessOperation):
     def on_init(self):
-        if not hasattr(self, "api_key"):
-            setattr(self, "api_key", "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")
         return
 
     def on_message(self,request):
@@ -32,40 +32,51 @@ class HFOperation(BusinessOperation):
 
 class MLOperation(BusinessOperation):
     def on_init(self):
-        # if not hasattr(self,"transf_mod_name"):
-        #     self.transf_mod_name = "TFOpenAIGPTLMHeadModel"
-        # if not hasattr(self,"transf_tok_name"):
-        #     self.transf_tok_name = "OpenAIGPTTokenizer"
-
-        if not hasattr(self,"model_url"):
-            self.model_url = "https://s3.amazonaws.com/models.huggingface.co/bert/openai-gpt-tf_model.h5"
-        if not hasattr(self,"config_url"):
-            self.config_url = "https://s3.amazonaws.com/models.huggingface.co/bert/openai-gpt-config.json"
-
-        self.model_name = self.model_url.split("/")[-1]
-        self.config_name = self.config_url.split("/")[-1]
-
         if not hasattr(self,"path"):
             self.path = "/irisdev/app/src/model/"
 
-        self.download(self.model_name,self.model_url)
-        self.download(self.config_name,self.config_url)
+        if not hasattr(self,"name"):
+            self.name = "gpt2"
 
-        self.log_info("All downloads are completed or cached, loading the model and the config")
-        self.model = TFAutoModel.from_pretrained(pretrained_model_name_or_path = self.path + self.config_name, config = self.path + self.model_name,from_pt=True)
-        #self.model = TFAutoModel.from_pretrained(self.path)
-        self.tokenizer = AutoTokenizer.from_pretrained("openai-gpt")
+        if not hasattr(self,'purpose'):
+            self.purpose = "text-generation"
+
+        if hasattr(self,"model_url"):
+            try:
+                soup = BS(requests.get(self.model_url + "/tree/main").text)
+                elem = soup.findAll('a',{"download":True,"href":True})
+                for el in elem:
+                    href = el['href']
+                    tmp_name = href.split("/")[-1]
+                    if tmp_name[0] != ".":
+                        self.download(tmp_name,"https://huggingface.co" + href)
+                self.log_info("All downloads are completed or cached ; loading the model and the config from folder " + self.path + self.name)
+            except Exception as e:
+                self.log_info(str(e))
+                self.log_info("Impossible to request from HuggingFace ; loading the model and the config from existing folder " + self.path + self.name)
+        else:
+            self.log_info("No given model_url ; trying to load the model and the config from the folder " + self.path + self.name)
+
+
+        try:
+            self.generator = pipeline(self.purpose, model=self.path + self.name, tokenizer=self.path + self.name)
+            self.log_info("Model and config loaded")
+        except Exception as e:
+            self.log_info(str(e))
+            self.log_info("Error while loading the model and the config")
         return
 
     def download(self,name,url):
         try:
-            if not exists(self.path + name):
-                with open(self.path + name, "wb") as f:
+            if not exists(self.path + self.name):
+                mkdir(self.path + self.name)
+            if not exists(self.path + self.name + "/" + name):
+                with open(self.path + self.name + "/" + name, "wb") as f:
                     self.log_info("Downloading %s" % name)
                     response = requests.get(url, stream=True)
                     total_length = response.headers.get('content-length')
 
-                    if total_length is None: # no content length header
+                    if total_length is None or int(total_length) < 0.5E9: # no content length header
                         f.write(response.content)
                     else:
                         dl = 0
@@ -85,13 +96,17 @@ class MLOperation(BusinessOperation):
         return
 
     def on_ml_request(self,request:MLRequest):
-        resp = MLResponse()
-        try:   
-            inputs = self.tokenizer(request.input, return_tensors="tf")
+        args = dict()
+        for key,value in request.__dict__.items():
+            if key[0] != "_":
+                args[key] = value
 
-            outputs = self.model(inputs)
-            
-            resp.logits = outputs.logits
+        resp = MLResponse()
+
+        try:   
+            ret = self.generator(**args)
+            resp.output = ret
+
         except Exception as e:
             self.log_info(str(e))
         return resp

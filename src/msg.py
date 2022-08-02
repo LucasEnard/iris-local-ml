@@ -1,3 +1,4 @@
+from time import strftime
 from grongier.pex import Message
 from dataclasses import dataclass
 
@@ -12,9 +13,9 @@ class HFResponse(Message):
 
 @dataclass()
 class MLRequest(Message):
-    input:str = None
+    pass
 
 @dataclass()
 class MLResponse(Message):
-    logits:str = None
+    output:str = None
 
