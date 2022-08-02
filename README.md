@@ -64,8 +64,9 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 See as example:<br>
 ![sending hf req](https://user-images.githubusercontent.com/77791586/182403526-0f6e97a0-2019-4d86-b1ae-38c56dfc8746.png)
-![hf req](https://user-images.githubusercontent.com/77791586/182403515-7c6c2075-bdb6-46cd-9258-ac251844d591.png)
-![hf resp](https://user-images.githubusercontent.com/77791586/182403522-5e2f962f-2de0-40d3-8120-f2f3fcb74759.png)
+![hf req](https://user-images.githubusercontent.com/77791586/182403522-5e2f962f-2de0-40d3-8120-f2f3fcb74759.png)
+![hf resp](https://user-images.githubusercontent.com/77791586/182403515-7c6c2075-bdb6-46cd-9258-ac251844d591.png)
+
 
 
 # 4. Use any model from the web
@@ -153,6 +154,7 @@ task=fill-mask
 ```
 
 **NOTE** that any settings that are not `name` or `model_url` will go into the PIPELINE settings, so in our second example, the camembert-ner pipeline requirers an `aggregation_strategy` and a `task` that are specified here while the gpt2 requirers only a `task`.
+
 See as example:<br>
 ![settings ml ope2](https://user-images.githubusercontent.com/77791586/182403258-c24efb77-2696-4462-ae71-9184667ac9e4.png)
 
