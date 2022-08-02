@@ -10,10 +10,10 @@ Usage of Machine Learning models in IRIS using Python
 - [4. Use any model from the web](#4-use-any-model-from-the-web)
   - [4.1. FIRST CASE : YOU HAVE YOUR OWN MODEL](#41-first-case--you-have-your-own-model)
   - [4.2. SECOND CASE : YOU WANT TO DOWNLOAD A MODEL FROM HUGGINGFACE](#42-second-case--you-want-to-download-a-model-from-huggingface)
-    - [Settings](#settings)
-    - [Testing](#testing)
-- [TroubleShooting](#troubleshooting)
-- [5. Conclusion](#5-conclusion)
+    - [4.2.1. Settings](#421-settings)
+    - [4.2.2. Testing](#422-testing)
+- [5. TroubleShooting](#5-troubleshooting)
+- [6. Conclusion](#6-conclusion)
 
 # 2. Installation
 ## 2.1. Starting the Production
@@ -111,7 +111,7 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 ## 4.2. SECOND CASE : YOU WANT TO DOWNLOAD A MODEL FROM HUGGINGFACE
 In this case, you must find the URL of the model on HuggingFace;
-### Settings
+### 4.2.1. Settings
 From here you must go to the parameters of the `Python.MLOperation`.<br>
 Click on the `Python.MLOperation` then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
 Here, you can enter or modify any parameters ( don't forget to press `apply` once your are done ).<br>
@@ -147,7 +147,7 @@ Now you can double-click on the operation `Python.MLOperation` and `start` it.<b
 
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
 
-### Testing
+### 4.2.2. Testing
 To call that pipeline, click on the operation `Python.MLOperation` , and select in the right tab `action`, you can `test` the demo.
 
 In this `test` window, select :<br>
@@ -164,7 +164,7 @@ msg.MLRequest
 ```
 {
     "text_inputs":"George Washington lived",
-    "max_length":100,
+    "max_length":30,
     "num_return_sequences":3
 }
 ```
@@ -188,7 +188,7 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 **NOTE** that once the model was downloaded once, the production won't download it again but get the cached files found at `src/model/TheModelName/`.<br>
 If some files are missing, the Production will download them again.
 
-# TroubleShooting
+# 5. TroubleShooting
 
 If you have issues, reading is the first advice we can give you, most errors are easily understood just by reading the logs as almost all errors will be captured by a try / catch and logged.<br>
 
@@ -201,6 +201,6 @@ To open a terminal there are many ways,
 Some models may require some changes for the pipeline or the settings for example, it is your task to add in the settings and in the request the right information.
 
 
-# 5. Conclusion
+# 6. Conclusion
 From here you should be able to use any model that you need or own on IRIS.<br>
 **NOTE** that you can create a `Python.MLOperation` for each of your model and have them on at the same time. 

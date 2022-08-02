@@ -21,12 +21,12 @@ class HFOperation(BusinessOperation):
         return
 
     def on_hfrequest(self,request:HFRequest):
-        response = HFResponse(self.query(request.api_url,request.payload))
+        response = HFResponse(self.query(request.api_key,request.api_url,request.payload))
         return response
         
-    def query(self,api_url,payload):
+    def query(self,api_key,api_url,payload):
         data = json.dumps(payload)
-        headers = {"Authorization": f"Bearer {self.api_key}"}
+        headers = {"Authorization": f"Bearer {api_key}"}
         response = requests.request("POST", api_url, headers=headers, data=data)
         return json.loads(response.content.decode("utf-8"))
 
