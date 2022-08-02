@@ -17,7 +17,8 @@ task=text-generation</Setting>
   <Item Name="Python.MLOperation2" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Host" Name="%settings">name=camembert-ner
 model_url=https://huggingface.co/Jean-Baptiste/camembert-ner
-task=ner</Setting>
+task=ner
+aggregation_strategy=simple</Setting>
   </Item>
   <Item Name="Python.MLOperation3" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Host" Name="%settings">name=bert-base-uncased
