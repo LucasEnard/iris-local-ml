@@ -38,8 +38,8 @@ class MLOperation(BusinessOperation):
         if not hasattr(self,"name"):
             self.name = "gpt2"
 
-        if not hasattr(self,'purpose'):
-            self.purpose = "text-generation"
+        if not hasattr(self,'task'):
+            self.task = "text-generation"
 
         if hasattr(self,"model_url"):
             try:
@@ -48,8 +48,10 @@ class MLOperation(BusinessOperation):
                 for el in elem:
                     href = el['href']
                     tmp_name = href.split("/")[-1]
-                    if tmp_name[0] != ".":
-                        self.download(tmp_name,"https://huggingface.co" + href)
+                    # Check if .gitignore or LICENSE file or readme file
+                    # if tmp_name[0] != "." and tmp_name.lower() != "license" and tmp_name.split(".")[-1] != "md":
+                    #     self.download(tmp_name,"https://huggingface.co" + href)
+                    self.download(tmp_name,"https://huggingface.co" + href)
                 self.log_info("All downloads are completed or cached ; loading the model and the config from folder " + self.path + self.name)
             except Exception as e:
                 self.log_info(str(e))
@@ -59,7 +61,11 @@ class MLOperation(BusinessOperation):
 
 
         try:
-            self.generator = pipeline(self.purpose, model=self.path + self.name, tokenizer=self.path + self.name)
+            config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request']))
+            config_dict = dict()
+            for attr in config_attr:
+                config_dict[attr] = getattr(self,attr)
+            self.generator = pipeline(model=self.path + self.name, tokenizer=self.path + self.name, **config_dict)
             self.log_info("Model and config loaded")
         except Exception as e:
             self.log_info(str(e))
@@ -76,17 +82,22 @@ class MLOperation(BusinessOperation):
                     response = requests.get(url, stream=True)
                     total_length = response.headers.get('content-length')
 
-                    if total_length is None or int(total_length) < 0.5E9: # no content length header
+                    if total_length is None or int(total_length) < 0.2E9: # no content length header
                         f.write(response.content)
                     else:
+                        try:
+                            nb_chunck = min(20,int(int(total_length)*1E-8))
+                        except Exception as e:
+                            self.log_info(str(e))
+                            nb_chunck = 20
                         dl = 0
                         total_length = int(total_length)
-                        for data in response.iter_content(chunk_size=int(total_length/20)):
+                        for data in response.iter_content(chunk_size=int(total_length/nb_chunck)):
                             dl += len(data)
                             f.write(data)
-                            done = int(20 * dl / total_length)
-                            self.log_info(f"[{'=' * done + '-' * (20-done)}] " + f"{round(dl*1E-9,2)}go/{round(total_length*1E-9,2)}go")
-                self.log_info("Download complete") 
+                            done = int(nb_chunck * dl / total_length)
+                            self.log_info(f"[{'#' * done + ' -' * (nb_chunck-done)}] " + f"{round(dl*1E-9,2)}go/{round(total_length*1E-9,2)}go")
+                self.log_info("Download complete for " + name) 
             else:
                 self.log_info("Existing files found for " + name)
         except Exception as e:

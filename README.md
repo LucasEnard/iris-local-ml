@@ -10,6 +10,9 @@ Usage of Machine Learning models in IRIS using Python
 - [4. Use any model from the web](#4-use-any-model-from-the-web)
   - [4.1. FIRST CASE : YOU HAVE YOUR OWN MODEL](#41-first-case--you-have-your-own-model)
   - [4.2. SECOND CASE : YOU WANT TO DOWNLOAD A MODEL FROM HUGGINGFACE](#42-second-case--you-want-to-download-a-model-from-huggingface)
+    - [Settings](#settings)
+    - [Testing](#testing)
+- [TroubleShooting](#troubleshooting)
 - [5. Conclusion](#5-conclusion)
 
 # 2. Installation
@@ -73,9 +76,9 @@ Here's the default configuration for this case :<br>
 %settings
 ```
 name=yourmodelname
-purpose=text-generation
+task=text-generation
 ```
-Here, `purpose` takes as an argument the `TASK` or the `PURPOSE` of your model.
+**NOTE** that any settings that are not `name` or `model_url` will go into the PIPELINE settings.
 
 Now you can double-click on the operation `Python.MLOperation` and `start` it.
 You must see in the `Log` part the starting of your model.
@@ -108,18 +111,35 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 ## 4.2. SECOND CASE : YOU WANT TO DOWNLOAD A MODEL FROM HUGGINGFACE
 In this case, you must find the URL of the model on HuggingFace;
-
+### Settings
 From here you must go to the parameters of the `Python.MLOperation`.<br>
 Click on the `Python.MLOperation` then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
 Here, you can enter or modify any parameters ( don't forget to press `apply` once your are done ).<br>
-Here's an example configuration for this case :<br>
-%settings
+Here's some example configuration for some models we found on HuggingFace :<br>
+%settings for gpt2
 ```
 model_url=https://huggingface.co/gpt2
 name=gpt2
-purpose=text-generation
+task=text-generation
 ```
-Here, `purpose` takes as an argument the `TASK` or the `PURPOSE` of your model.
+
+%settings for camembert-ner
+```
+name=camembert-ner
+model_url=https://huggingface.co/Jean-Baptiste/camembert-ner
+task=ner
+aggregation_strategy=simple
+```
+
+%settings for bert-base-uncased
+```
+name=bert-base-uncased
+model_url=https://huggingface.co/bert-base-uncased
+task=fill-mask
+```
+
+**NOTE** that any settings that are not `name` or `model_url` will go into the PIPELINE settings, so in our second example, the camembert-ner pipeline requirers an `aggregation_strategy` and a `task` that are specified here while the gpt2 requirers only a `task`.
+
 
 Now you can double-click on the operation `Python.MLOperation` and `start` it.<br>
 **You must see in the `Log` part the starting of your model and the downloading.**<br>
@@ -127,6 +147,7 @@ Now you can double-click on the operation `Python.MLOperation` and `start` it.<b
 
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
 
+### Testing
 To call that pipeline, click on the operation `Python.MLOperation` , and select in the right tab `action`, you can `test` the demo.
 
 In this `test` window, select :<br>
@@ -139,12 +160,26 @@ msg.MLRequest
 ```
 
  And for the `json`, you must enter every arguments needed by your model.<br>
- Here is an example of a call to GPT2 :
+ Here is an example of a call to GPT2 ( `Python.MLOperation` ):
 ```
 {
-    "text_inputs":"Unfortunately, the outcome",
+    "text_inputs":"George Washington lived",
     "max_length":100,
     "num_return_sequences":3
+}
+```
+
+ Here is an example of a call to Camembert-ner ( `Python.MLOperation2` ) :
+```
+{
+    "inputs":"George Washington lived in washington"
+}
+```
+
+ Here is an example of a call to bert-base-uncased ( `Python.MLOperation3` ) :
+```
+{
+    "inputs":"George Washington lived in [MASK]."
 }
 ```
 Click `Invoke Testing Service` and wait for the model to operate.<br>
@@ -152,6 +187,19 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 **NOTE** that once the model was downloaded once, the production won't download it again but get the cached files found at `src/model/TheModelName/`.<br>
 If some files are missing, the Production will download them again.
+
+# TroubleShooting
+
+If you have issues, reading is the first advice we can give you, most errors are easily understood just by reading the logs as almost all errors will be captured by a try / catch and logged.<br>
+
+If you need to install a new module, or Python dependence, open a terminal inside the container and enter for example : "pip install new-module"<br>
+To open a terminal there are many ways, 
+- If you use the InterSystems plugins, you can click in the below bar in VSCode, the one looking like `docker:iris:52795[IRISAPP]` and select `Open Shell in Docker`.
+- In any local terminal enter : `docker-compose exec -it iris bash`
+- From Docker-Desktop find the IRIS container and click on `Open in terminal`
+
+Some models may require some changes for the pipeline or the settings for example, it is your task to add in the settings and in the request the right information.
+
 
 # 5. Conclusion
 From here you should be able to use any model that you need or own on IRIS.<br>
