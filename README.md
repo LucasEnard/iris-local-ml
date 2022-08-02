@@ -64,7 +64,7 @@ Now you can click on `Visual Trace` to see in details what happened and see the 
 
 See as example:<br>
 ![sending hf req](https://user-images.githubusercontent.com/77791586/182403526-0f6e97a0-2019-4d86-b1ae-38c56dfc8746.png)
-![hf req](https://user-images.githubusercontent.com/77791586/182403522-5e2f962f-2de0-40d3-8120-f2f3fcb74759.png)
+![hf req](https://user-images.githubusercontent.com/77791586/182404662-b37b9489-c12c-47f8-98bd-18008c9a615e.jpg)
 ![hf resp](https://user-images.githubusercontent.com/77791586/182403515-7c6c2075-bdb6-46cd-9258-ac251844d591.png)
 
 
