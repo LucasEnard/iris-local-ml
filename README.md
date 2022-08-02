@@ -161,7 +161,7 @@ See as example:<br>
 Now you can double-click on the operation `Python.MLOperation` and `start` it.<br>
 **You must see in the `Log` part the starting of your model and the downloading.**<br>
 **NOTE** You can refresh those logs every x seconds to see the advancement with the downloads.
-![dl in real time](https://user-images.githubusercontent.com/77791586/182403064-856724b5-876e-460e-a2b4-34eb63f44673.png
+![dl in real time](https://user-images.githubusercontent.com/77791586/182403064-856724b5-876e-460e-a2b4-34eb63f44673.png)
 
 
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
