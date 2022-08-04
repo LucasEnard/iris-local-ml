@@ -25,6 +25,16 @@ aggregation_strategy=simple</Setting>
 model_url=https://huggingface.co/bert-base-uncased
 task=fill-mask</Setting>
   </Item>
+  <Item Name="Python.MLOperationDETRRESNET" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="%settings">name=detr-resnet-50
+model_url=https://huggingface.co/facebook/detr-resnet-50
+task=object-detection</Setting>
+  </Item>
+  <Item Name="Python.MLOperationDetrPanoptic" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="%settings">name=detr-resnet-50-panoptic
+model_url=https://huggingface.co/facebook/detr-resnet-50-panoptic
+task=image-segmentation</Setting>
+  </Item>
 </Production>
 }
 
