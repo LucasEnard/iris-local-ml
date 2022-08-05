@@ -90,11 +90,12 @@ class MLOperation(BusinessOperation):
             self.log_info("No given model_url ; trying to load the model and the config from the folder " + self.path + self.name)
 
 
-        # Loading the model and the config from the folder.
+        # Get all the attributes of self to put it into the pipeline
         config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request','object_detection_segmentation','generator']))
         config_dict = dict()
         for attr in config_attr:
             config_dict[attr] = getattr(self,attr)
+        # Loading the model and the config from the folder.
         self.generator = pipeline(model=self.path + self.name, tokenizer=self.path + self.name, **config_dict)
         self.log_info("Model and config loaded")
 
