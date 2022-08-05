@@ -25,12 +25,12 @@ aggregation_strategy=simple</Setting>
 model_url=https://huggingface.co/bert-base-uncased
 task=fill-mask</Setting>
   </Item>
-  <Item Name="Huggin Face Image resnet local" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="HugginFace Image resnet local" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Host" Name="%settings">name=detr-resnet-50
 model_url=https://huggingface.co/facebook/detr-resnet-50
 task=object-detection</Setting>
   </Item>
-  <Item Name="Huggin Face Image panoptic local" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="HugginFace Image panoptic local" Category="" ClassName="Python.MLOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Host" Name="%settings">name=detr-resnet-50-panoptic
 model_url=https://huggingface.co/facebook/detr-resnet-50-panoptic
 task=image-segmentation</Setting>
