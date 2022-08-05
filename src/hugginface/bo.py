@@ -91,7 +91,7 @@ class MLOperation(BusinessOperation):
 
 
         # Get all the attributes of self to put it into the pipeline
-        config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request','object_detection_segmentation','generator']))
+        config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request','object_detection_segmentation','generator','to_dict']))
         config_dict = dict()
         for attr in config_attr:
             config_dict[attr] = getattr(self,attr)
@@ -203,11 +203,13 @@ class MLOperation(BusinessOperation):
                 drawimage.rectangle(((xmin,ymin),(xmax,ymax)),outline=rgb,width=2)
                 drawimage.text((xmin,ymin),label,rgb)
 
+            # Converting the image into a binary format and then writing it into the 
+            # BinaryImage field of the response.
             output = BytesIO()
             image.save(output, format="png")
-            n = 3600
+            buffer = 3600
             binary = output.getvalue()
-            chunks = [binary[i:i+n] for i in range(0, len(binary), n)]
+            chunks = [binary[i:i+buffer] for i in range(0, len(binary), buffer)]
             for chunk in chunks:
                 resp.BinaryImage.Write(chunk)
         # Drawing the masks of each detected object on the image
@@ -220,10 +222,10 @@ class MLOperation(BusinessOperation):
                 b = random.randint(0,255)
                 rgb = (r,g,b)
                 try:
-                    bNwimage = Image.open(BytesIO(base64.b64decode(object['mask'])))
+                    bnw_image = Image.open(BytesIO(base64.b64decode(object['mask'])))
                 except:
-                    bNwimage = object['mask']
-                coloredimage = Image.composite(Image.new('RGBA', image.size, color = rgb),coloredimage,bNwimage)
+                    bnw_image = object['mask']
+                coloredimage = Image.composite(Image.new('RGBA', image.size, color = rgb),coloredimage,bnw_image)
             
             # Creating a mask with a transparency of 185 and then compositing the colored image with the original
             # image.
@@ -235,9 +237,9 @@ class MLOperation(BusinessOperation):
             # BinaryImage field of the response.
             output = BytesIO()
             image.save(output, format="png")
-            n = 3600
+            buffer = 3600
             binary = output.getvalue()
-            chunks = [binary[i:i+n] for i in range(0, len(binary), n)]
+            chunks = [binary[i:i+buffer] for i in range(0, len(binary), buffer)]
             for chunk in chunks:
                 resp.BinaryImage.Write(chunk)
         # The default case where the output is not an image.
