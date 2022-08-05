@@ -4,3 +4,4 @@ torch==1.12.0
 beautifulsoup4==4.11.1
 tensorflow==2.9.1
 sentencepiece==0.1.96
+pillow==9.2.0
