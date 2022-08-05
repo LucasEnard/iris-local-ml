@@ -21,19 +21,30 @@ from bs4 import BeautifulSoup as BS
 
 from transformers import pipeline
 
+# > This class is a business operation that receives a request from the client, sends it to the HF (Hunggin Face)
+# API, and returns the response to the client.
 class HFOperation(BusinessOperation):
-    def on_init(self):
-        return
-
-    def on_message(self,request):
-        self.log_info(str(request))
-        return
 
     def on_hfrequest(self,request:HFRequest):
-        response = HFResponse(self.query(request.api_key,request.api_url,request.payload))
-        return response
+        """
+        > The function takes a request object, queries the API, and returns a response object
+        
+        :param request: The request object that is passed to the function
+        :type request: HFRequest
+        :return: A HFResponse object
+        """
+        return HFResponse(self.query(request.api_key,request.api_url,request.payload))
         
     def query(self,api_key,api_url,payload):
+        """
+        It takes an API key, an API URL, and a payload (a dictionary of the query parameters) and returns
+        the response from the API as a dictionary
+        
+        :param api_key: Your API key
+        :param api_url: The URL of the API endpoint you're querying
+        :param payload: The query you want to run
+        :return: A JSON object
+        """
         data = json.dumps(payload)
         headers = {"Authorization": f"Bearer {api_key}"}
         response = requests.request("POST", api_url, headers=headers, data=data)
@@ -41,6 +52,11 @@ class HFOperation(BusinessOperation):
 
 class MLOperation(BusinessOperation):
     def on_init(self):
+        """
+        It downloads the model and the config from HuggingFace if the model_url is given, otherwise it
+        tries to load the model and the config from the folder
+        :return: The answer is a list of strings.
+        """
         if not hasattr(self,"path"):
             self.path = "/irisdev/app/src/model/"
 
@@ -50,6 +66,7 @@ class MLOperation(BusinessOperation):
         if not hasattr(self,'task'):
             self.task = "text-generation"
 
+        # Downloading the model and the config from HuggingFace 
         if hasattr(self,"model_url"):
             try:
                 soup = BS(requests.get(self.model_url + "/tree/main").text)
@@ -63,12 +80,13 @@ class MLOperation(BusinessOperation):
                     self.download(tmp_name,"https://huggingface.co" + href)
                 self.log_info("All downloads are completed or cached ; loading the model and the config from folder " + self.path + self.name)
             except Exception as e:
-                self.log_info(str(e))
+                self.log_warning(str(e))
                 self.log_info("Impossible to request from HuggingFace ; loading the model and the config from existing folder " + self.path + self.name)
         else:
             self.log_info("No given model_url ; trying to load the model and the config from the folder " + self.path + self.name)
 
 
+        # Loading the model and the config from the folder.
         try:
             config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request']))
             config_dict = dict()
@@ -77,11 +95,17 @@ class MLOperation(BusinessOperation):
             self.generator = pipeline(model=self.path + self.name, tokenizer=self.path + self.name, **config_dict)
             self.log_info("Model and config loaded")
         except Exception as e:
-            self.log_info(str(e))
+            self.log_warning(str(e))
             self.log_info("Error while loading the model and the config")
         return
 
     def download(self,name,url):
+        """
+        It downloads a file from a url and displays a progress bar
+        
+        :param name: the name of the file to download
+        :param url: The URL of the file you want to download
+        """
         try:
             if not exists(self.path + self.name):
                 mkdir(self.path + self.name)
@@ -91,13 +115,13 @@ class MLOperation(BusinessOperation):
                     response = requests.get(url, stream=True)
                     total_length = response.headers.get('content-length')
 
-                    if total_length is None or int(total_length) < 0.2E9: # no content length header
+                    if total_length is None or int(total_length) < 0.1E9: # no content length header
                         f.write(response.content)
                     else:
                         try:
-                            nb_chunck = min(20,ceil(ceil(total_length)*1E-8))
+                            nb_chunck = min(20,ceil(ceil(int(total_length))*1E-8))
                         except Exception as e:
-                            self.log_info(str(e))
+                            self.log_warning(str(e))
                             nb_chunck = 20
                         dl = 0
                         total_length = int(total_length)
@@ -110,12 +134,19 @@ class MLOperation(BusinessOperation):
             else:
                 self.log_info("Existing files found for " + name)
         except Exception as e:
-            self.log_info(str(e))
+            self.log_warning(str(e))
 
     def on_message(self,request):
         return
 
     def on_ml_request(self,request:MLRequest):
+        """
+        > The function takes in a request object, converts it into a dictionary, and then calls the
+        `generator` function with the dictionary as arguments
+        
+        :param request: The request object that is passed to the service
+        :type request: MLRequest
+        """
         args = dict()
         for key,value in request.__dict__.items():
             if key[0] != "_":
@@ -124,26 +155,32 @@ class MLOperation(BusinessOperation):
         resp = MLResponse()
         try: 
 
+            # Checking if the task is object detection or image segmentation or image classification. If it is, it
+            # calls the object_detection_segmentation function.
             if self.task == "object-detection" or self.task == "image-segmentation" or self.task == "image-classification":
                 resp = self.object_detection_segmentation(request)
             else:
-                ret = self.generator(**args)
+            # Calling the `generator` function with the dictionary `args` as arguments.
+                ret = self.generator(**MLRequest)
                 resp.output = ret
 
         except Exception as e:
-            self.log_info(str(e))
+            self.log_warning(str(e))
 
         return resp
     
     def object_detection_segmentation(self,req):
+        # Trying to open the image from the url. 
+        # If it fails, it tries to open the image from a path.
         try:
             image = Image.open(requests.get(req.url, stream=True).raw)
         except:
             try:
                 image = Image.open(req.url)
             except Exception as e:
-                self.log_info(str(e))
+                self.log_warning(str(e))
 
+        # Calling the `generator` function with the image as an argument.
         res = self.generator(image)
         resp = MLResponse(res)
         try:
@@ -183,10 +220,14 @@ class MLOperation(BusinessOperation):
                         bNwimage = object['mask']
                     coloredimage = Image.composite(Image.new('RGBA', image.size, color = rgb),coloredimage,bNwimage)
                 
+                # Creating a mask with a transparency of 185 and then compositing the colored image with the original
+                # image.
                 mask = Image.new('RGBA', image.size, color = (255,255,255))
                 mask.putalpha(185)
                 image = Image.composite(coloredimage,image,mask)
 
+                # Converting the image into a binary format and then writing it into the 
+                # BinaryImage field of the response.
                 output = BytesIO()
                 image.save(output, format="png")
                 n = 3600
@@ -198,6 +239,6 @@ class MLOperation(BusinessOperation):
             else:
                 resp.output = res
         except Exception as e:
-            self.log_info(str(e))
+            self.log_warning(str(e))
         return resp
 
