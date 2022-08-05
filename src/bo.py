@@ -26,14 +26,36 @@ class HFOperation(BusinessOperation):
         return
 
     def on_message(self,request):
+        """
+        The function takes a request object, logs it, and returns nothing
+        
+        :param request: The request object
+        :return: The request object is being returned.
+        """
         self.log_info(str(request))
         return
 
     def on_hfrequest(self,request:HFRequest):
+        """
+        > The function takes a request object, queries the API, and returns a response object
+        
+        :param request: The request object that is passed to the function
+        :type request: HFRequest
+        :return: A HFResponse object
+        """
         response = HFResponse(self.query(request.api_key,request.api_url,request.payload))
         return response
         
     def query(self,api_key,api_url,payload):
+        """
+        It takes an API key, an API URL, and a payload (a dictionary of the query parameters) and returns
+        the response from the API as a dictionary
+        
+        :param api_key: Your API key
+        :param api_url: The URL of the API endpoint you're querying
+        :param payload: The query you want to run
+        :return: A JSON object
+        """
         data = json.dumps(payload)
         headers = {"Authorization": f"Bearer {api_key}"}
         response = requests.request("POST", api_url, headers=headers, data=data)
@@ -41,6 +63,11 @@ class HFOperation(BusinessOperation):
 
 class MLOperation(BusinessOperation):
     def on_init(self):
+        """
+        It downloads the model and the config from HuggingFace if the model_url is given, otherwise it
+        tries to load the model and the config from the folder
+        :return: The answer is a list of strings.
+        """
         if not hasattr(self,"path"):
             self.path = "/irisdev/app/src/model/"
 
@@ -52,14 +79,13 @@ class MLOperation(BusinessOperation):
 
         if hasattr(self,"model_url"):
             try:
+                # Get the elements from the html page of the model page on HuggingFace
                 soup = BS(requests.get(self.model_url + "/tree/main").text)
                 elem = soup.findAll('a',{"download":True,"href":True})
+                # Download every element
                 for el in elem:
                     href = el['href']
                     tmp_name = href.split("/")[-1]
-                    # Check if .gitignore or LICENSE file or readme file
-                    # if tmp_name[0] != "." and tmp_name.lower() != "license" and tmp_name.split(".")[-1] != "md":
-                    #     self.download(tmp_name,"https://huggingface.co" + href)
                     self.download(tmp_name,"https://huggingface.co" + href)
                 self.log_info("All downloads are completed or cached ; loading the model and the config from folder " + self.path + self.name)
             except Exception as e:
@@ -70,7 +96,8 @@ class MLOperation(BusinessOperation):
 
 
         try:
-            config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request']))
+            # Get all the attributes of self to put it into the pipeline
+            config_attr = set(dir(self)).difference(set(dir(BusinessOperation))).difference(set(['name','model_url','path','download','on_ml_request','object_detection_segmentation']))
             config_dict = dict()
             for attr in config_attr:
                 config_dict[attr] = getattr(self,attr)
@@ -86,6 +113,8 @@ class MLOperation(BusinessOperation):
             if not exists(self.path + self.name):
                 mkdir(self.path + self.name)
             if not exists(self.path + self.name + "/" + name):
+                # Open the file and write in it by chunck of size total_lenght/20.
+                # For every chunck, write an advancement message in the logs
                 with open(self.path + self.name + "/" + name, "wb") as f:
                     self.log_info("Downloading %s" % name)
                     response = requests.get(url, stream=True)
@@ -116,6 +145,13 @@ class MLOperation(BusinessOperation):
         return
 
     def on_ml_request(self,request:MLRequest):
+        """
+        > The function takes in a request object, puts it's variable into a dictionary, and then calls the
+        `generator` function with the dictionary as arguments
+        
+        :param request: The request object that is passed to the operation
+        :type request: MLRequest
+        """
         args = dict()
         for key,value in request.__dict__.items():
             if key[0] != "_":
@@ -136,9 +172,18 @@ class MLOperation(BusinessOperation):
         return resp
     
     def object_detection_segmentation(self,req):
+        """
+        The function takes in an image url and returns a response object with the image with the
+        bounding boxes and labels drawn on it
+        
+        :param req: The request message that contains the image url
+        :return: The output of the model is being returned.
+        """
+        # If the url is an url, download the image
         try:
             image = Image.open(requests.get(req.url, stream=True).raw)
         except:
+            # Else, fecth the image from the local files
             try:
                 image = Image.open(req.url)
             except Exception as e:
@@ -151,6 +196,7 @@ class MLOperation(BusinessOperation):
             if res[0].__contains__("box"):
                 resp = iris.cls('PEX.Msg.ImageDisplay')._New()
                 drawimage = ImageDraw.Draw(image)
+                # It's drawing the bounding boxes and the labels on the image.
                 for object in res:
                     r = random.randint(0,255)
                     g = random.randint(0,255)
@@ -161,6 +207,7 @@ class MLOperation(BusinessOperation):
                     drawimage.rectangle(((xmin,ymin),(xmax,ymax)),outline=rgb,width=2)
                     drawimage.text((xmin,ymin),label,rgb)
 
+                # It's converting the image into a binary and then writing it into the response object.
                 output = BytesIO()
                 image.save(output, format="png")
                 n = 3600
@@ -172,6 +219,7 @@ class MLOperation(BusinessOperation):
             elif res[0].__contains__("mask"):
                 resp = iris.cls('PEX.Msg.ImageDisplay')._New()
                 coloredimage = image.copy()
+                # It's drawing the masks of each detected object on the image.
                 for object in res:
                     r = random.randint(0,255)
                     g = random.randint(0,255)
@@ -183,10 +231,12 @@ class MLOperation(BusinessOperation):
                         bNwimage = object['mask']
                     coloredimage = Image.composite(Image.new('RGBA', image.size, color = rgb),coloredimage,bNwimage)
                 
+                # Takes the coloredimage and mask it into the base image
                 mask = Image.new('RGBA', image.size, color = (255,255,255))
                 mask.putalpha(185)
                 image = Image.composite(coloredimage,image,mask)
 
+                # It's converting the image into a binary and then writing it into the response object.
                 output = BytesIO()
                 image.save(output, format="png")
                 n = 3600

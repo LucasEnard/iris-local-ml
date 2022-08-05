@@ -1,11 +1,19 @@
 # 1. iris-huggingface
-Usage of Machine Learning models in IRIS using Python
+Usage of Machine Learning models in IRIS using Python; For text-to-text, text-to-image or image-to-image models.<br>
+
+Here, models as example :
+- https://huggingface.co/gpt2
+- https://huggingface.co/Jean-Baptiste/camembert-ner
+- https://huggingface.co/bert-base-uncased
+- https://huggingface.co/facebook/detr-resnet-50
+- https://huggingface.co/facebook/detr-resnet-50-panoptic
 
 - [1. iris-huggingface](#1-iris-huggingface)
 - [2. Installation](#2-installation)
   - [2.1. Starting the Production](#21-starting-the-production)
   - [2.2. Access the Production](#22-access-the-production)
   - [2.3. Closing the Production](#23-closing-the-production)
+- [How it works](#how-it-works)
 - [3. HuggingFace API](#3-huggingface-api)
 - [4. Use any model from the web](#4-use-any-model-from-the-web)
   - [4.1. FIRST CASE : YOU HAVE YOUR OWN MODEL](#41-first-case--you-have-your-own-model)
@@ -32,6 +40,12 @@ Following this link, access the production :
 ```
 docker-compose down
 ```
+
+# How it works
+For now, some models may not work with this implementation since everything is automatically done, which means, no matter what model you input, we will try to make it work through `transformers` `pipeline` library.<br>
+
+Pipeline is a powerful tool by the HuggingFace team that will scan the folder in which we downloaded the model, then understand what library it should use between PyTorch, Keras, Tensorflow or JAX to then load that model using `AutoModel`.<br>
+From here, by inputting the task, the pipeline knows what to do with the model, tokenizer or even feature-extractor in this folder, and manage your input automatically, tokenize it, process it, pass it into the model, then give back the output in a decoded form usable directly by us.
 
 # 3. HuggingFace API
 
@@ -131,6 +145,7 @@ From here you must go to the parameters of the `Python.MLOperation`.<br>
 Click on the `Python.MLOperation` then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
 Here, you can enter or modify any parameters ( don't forget to press `apply` once your are done ).<br>
 Here's some example configuration for some models we found on HuggingFace :<br>
+
 %settings for gpt2
 ```
 model_url=https://huggingface.co/gpt2
@@ -151,6 +166,20 @@ aggregation_strategy=simple
 name=bert-base-uncased
 model_url=https://huggingface.co/bert-base-uncased
 task=fill-mask
+```
+
+%settings for detr-resnet-50
+```
+name=detr-resnet-50
+model_url=https://huggingface.co/facebook/detr-resnet-50
+task=object-detection
+```
+
+%settings for detr-resnet-50-protnic
+```
+name=detr-resnet-50-panoptic
+model_url=https://huggingface.co/facebook/detr-resnet-50-panoptic
+task=image-segmentation
 ```
 
 **NOTE** that any settings that are not `name` or `model_url` will go into the PIPELINE settings, so in our second example, the camembert-ner pipeline requirers an `aggregation_strategy` and a `task` that are specified here while the gpt2 requirers only a `task`.
@@ -201,6 +230,20 @@ msg.MLRequest
     "inputs":"George Washington lived in [MASK]."
 }
 ```
+
+ Here is an example of a call to detr-resnet-50 using an online url ( `Python.MLOperationDETRRESNET` ) :
+```
+{
+    "url":"http://images.cocodataset.org/val2017/000000039769.jpg"
+}
+```
+
+ Here is an example of a call to detr-resnet-50-panoptic using the url as a path( `Python.MLOperationDetrPanoptic` ) :
+```
+{
+    "url":"/irisdev/app/misc/000000039769.jpg"
+}
+```
 Click `Invoke Testing Service` and wait for the model to operate.<br>
 Now you can click on `Visual Trace` to see in details what happened and see the logs.
 
@@ -211,6 +254,10 @@ See as example:<br>
 ![sending ml req](https://user-images.githubusercontent.com/77791586/182402707-13ca90d0-ad5a-4934-8923-a58fe821e00e.png)
 ![ml req](https://user-images.githubusercontent.com/77791586/182402878-e34b64de-351c-49c3-affe-023cd885e04b.png)
 ![ml resp](https://user-images.githubusercontent.com/77791586/182402932-4afd14fe-5f57-4b03-b0a6-1c6b74474015.png)
+
+See as example:<br>
+![sending ml req](https://user-images.githubusercontent.com/77791586/183036076-f0cb9512-573b-4723-aa70-64f575c8f563.png)
+![ml resp](https://user-images.githubusercontent.com/77791586/183036060-2a2328f7-535e-4046-9d2c-02d6fa666362.png)
 
 # 5. TroubleShooting
 
