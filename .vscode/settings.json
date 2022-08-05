@@ -1,8 +1,7 @@
 {
     "files.associations": {
     
-        "Dockerfile*": "dockerfile",
-        "iris.script": "objectscript"
+        "Dockerfile*": "dockerfile"
       },
     "objectscript.conn" :{
       "ns": "IRISAPP",
