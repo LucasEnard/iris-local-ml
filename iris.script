@@ -9,8 +9,8 @@
 
  //Register Python code
   
- zw ##class(Grongier.PEX.Utils).RegisterComponent("bo","HFOperation","/irisdev/app/src/hugginface/",1,"Python.HFOperation")
- zw ##class(Grongier.PEX.Utils).RegisterComponent("bo","MLOperation","/irisdev/app/src/hugginface/",1,"Python.MLOperation")
+ zw ##class(Grongier.PEX.Utils).RegisterComponent("bo","HFOperation","/irisdev/app/src/HuggingFace/",1,"Python.HFOperation")
+ zw ##class(Grongier.PEX.Utils).RegisterComponent("bo","MLOperation","/irisdev/app/src/HuggingFace/",1,"Python.MLOperation")
 
  set ^EnsPortal.Settings("SuperUser","LastProduction")	= "iris.Production"
  

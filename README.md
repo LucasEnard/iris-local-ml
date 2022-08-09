@@ -90,8 +90,8 @@ In the section we will teach you how to use almost any model from the internet, 
 In this case, you must copy paste your model, with the config, the tokenizer.json etc inside a folder inside the model folder.<br>
 Path : `src/model/yourmodelname/` 
 
-From here you must go to the parameters of the `Python.MLOperation`.<br>
-Click on the `Python.MLOperation` then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
+From here you must create a new opearation, call it as you wish, go to the parameters of this operation.<br>
+Then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
 Here, you can enter or modify any parameters ( don't forget to press `apply` once your are done ).<br>
 Here's the default configuration for this case :<br>
 %settings
@@ -101,12 +101,12 @@ task=text-generation
 ```
 **NOTE** that any settings that are not `name` or `model_url` will go into the PIPELINE settings.
 
-Now you can double-click on the operation `Python.MLOperation` and `start` it.
+Now you can double-click on the operation and `start` it.
 You must see in the `Log` part the starting of your model.
 
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
 
-To call that pipeline, click on the operation `Python.MLOperation` , and select in the right tab `action`, you can `test` the demo.
+To call that pipeline, click on the operation, and select in the right tab `action`, you can `test` the demo.
 
 In this `test` window, select :<br>
 
@@ -141,8 +141,8 @@ See for example :<br>
 ## 4.2. SECOND CASE : YOU WANT TO DOWNLOAD A MODEL FROM HUGGINGFACE
 In this case, you must find the URL of the model on HuggingFace;
 ### 4.2.1. Settings
-From here you must go to the parameters of the `Python.MLOperation`.<br>
-Click on the `Python.MLOperation` then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
+From here you must go to the parameters of the `Hugging`.<br>
+Click on the `HuggingFace` operation of your choice then go to `settings` in the right tab, then in the `Python` part, then in the `%settings` part.
 Here, you can enter or modify any parameters ( don't forget to press `apply` once your are done ).<br>
 Here's some example configuration for some models we found on HuggingFace :<br>
 
@@ -187,7 +187,7 @@ task=image-segmentation
 See as example:<br>
 ![settings ml ope2](https://user-images.githubusercontent.com/77791586/182403258-c24efb77-2696-4462-ae71-9184667ac9e4.png)
 
-Now you can double-click on the operation `Python.MLOperation` and `start` it.<br>
+Now you can double-click on the operation and `start` it.<br>
 **You must see in the `Log` part the starting of your model and the downloading.**<br>
 **NOTE** You can refresh those logs every x seconds to see the advancement with the downloads.
 ![dl in real time](https://user-images.githubusercontent.com/77791586/182403064-856724b5-876e-460e-a2b4-34eb63f44673.png)
@@ -196,7 +196,7 @@ Now you can double-click on the operation `Python.MLOperation` and `start` it.<b
 From here, we create a `PIPELINE` using transformers that uses your config file find in the folder as seen before.
 
 ### 4.2.2. Testing
-To call that pipeline, click on the operation `Python.MLOperation` , and select in the right tab `action`, you can `test` the demo.
+To call that pipeline, click on the operation , and select in the right tab `action`, you can `test` the demo.
 
 In this `test` window, select :<br>
 
@@ -208,7 +208,7 @@ msg.MLRequest
 ```
 
  And for the `json`, you must enter every arguments needed by your model.<br>
- Here is an example of a call to GPT2 ( `Python.MLOperation` ):
+ Here is an example of a call to GPT2 :
 ```
 {
     "text_inputs":"George Washington lived",
@@ -217,28 +217,28 @@ msg.MLRequest
 }
 ```
 
- Here is an example of a call to Camembert-ner ( `Python.MLOperation2` ) :
+ Here is an example of a call to Camembert-ner :
 ```
 {
     "inputs":"George Washington lived in washington"
 }
 ```
 
- Here is an example of a call to bert-base-uncased ( `Python.MLOperation3` ) :
+ Here is an example of a call to bert-base-uncased :
 ```
 {
     "inputs":"George Washington lived in [MASK]."
 }
 ```
 
- Here is an example of a call to detr-resnet-50 using an online url ( `Python.MLOperationDETRRESNET` ) :
+ Here is an example of a call to detr-resnet-50 using an online url :
 ```
 {
     "url":"http://images.cocodataset.org/val2017/000000039769.jpg"
 }
 ```
 
- Here is an example of a call to detr-resnet-50-panoptic using the url as a path( `Python.MLOperationDetrPanoptic` ) :
+ Here is an example of a call to detr-resnet-50-panoptic using the url as a path:
 ```
 {
     "url":"/irisdev/app/misc/000000039769.jpg"
@@ -274,4 +274,4 @@ Some models may require some changes for the pipeline or the settings for exampl
 
 # 6. Conclusion
 From here you should be able to use any model that you need or own on IRIS.<br>
-**NOTE** that you can create a `Python.MLOperation` for each of your model and have them on at the same time. 
+**NOTE** that you can create a `Python.MLOperation` ( Hugging face operation ) for each of your model and have them on at the same time. 
