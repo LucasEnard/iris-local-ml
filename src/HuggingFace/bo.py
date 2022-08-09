@@ -164,7 +164,7 @@ class MLOperation(BusinessOperation):
             resp = self.object_detection_segmentation(request)
         # Calling the `generator` function with the dictionary `args` as arguments.
         else:
-            ret = self.generator(**self.to_dict(MLRequest))
+            ret = self.generator(**self.to_dict(request))
             resp.output = ret
 
         return resp
