@@ -2,7 +2,13 @@ from grongier.pex import BusinessOperation
 import iris
 
 from msg import HFRequest,HFResponse,MLRequest,MLResponse
-from dataclasses import asdict
+from msg import (CreatePersonResponse,CreatePersonRequest,
+                            GetPersonRequest,GetPersonResponse,
+                            GetAllPersonRequest,GetAllPersonResponse,
+                            UpdatePersonRequest,UpdatePersonResponse,
+                            DeletePersonRequest,DeletePersonResponse
+)
+from obj import Person
 
 from os.path import exists
 from os import mkdir
@@ -21,6 +27,8 @@ import requests
 from bs4 import BeautifulSoup as BS
 
 from transformers import pipeline
+
+import spacy
 
 # > This class is a business operation that receives a request from the client, sends it to the HF (Hunggin Face)
 # API, and returns the response to the client.
@@ -53,7 +61,6 @@ class HFOperation(BusinessOperation):
 
 class MLOperation(BusinessOperation):
 
-    generator = None
 
     def on_init(self):
         """
@@ -143,6 +150,7 @@ class MLOperation(BusinessOperation):
         """
         args = dict()
         for key,value in request.__dict__.items():
+            self.log_info(str(key) + " : " +str(value))
             if key[0] != "_":
                 args[key] = value
         return args
@@ -164,7 +172,12 @@ class MLOperation(BusinessOperation):
             resp = self.object_detection_segmentation(request)
         # Calling the `generator` function with the dictionary `args` as arguments.
         else:
-            ret = self.generator(**self.to_dict(request))
+            # self.log_info("generating args")
+            # args = self.to_dict(request)
+            # self.log_info(str(args))
+            self.log_info("generating ret")
+            ret = self.generator(request.inputs)
+            self.log_info(str(ret))
             resp.output = ret
 
         return resp
@@ -248,3 +261,212 @@ class MLOperation(BusinessOperation):
 
         return resp
 
+class SpacyOperation(BusinessOperation):
+
+
+    def on_init(self):
+        """
+        It downloads the model and the config from HuggingFace if the model_url is given, otherwise it
+        tries to load the model and the config from the folder
+        :return: The answer is a list of strings.
+        """
+        if not hasattr(self,"path"):
+            self.path = "/irisdev/app/src/model"
+        if not hasattr(self,"name"):
+            self.path = "en_healthsea"
+        if not hasattr(self,"url"):
+            self.url = "https://huggingface.co/explosion/en_healthsea"
+
+
+        # Loading the model and the config from the folder.
+        self.get_all_dl(self.path + "/" + self.name,self.url + "/tree/main")
+        self.generator = spacy.load(self.path + "/" + self.name)
+        self.log_info("SpaCy model and config loaded")
+
+
+    def get_all_dl(self,path,url):
+        soup = BS(requests.get(url).text,features="html.parser")
+        elems = soup.findAll('a',{"download":True,"href":True})
+        for elem in elems:
+            href = elem['href']
+            tmp_name = href.split("/")[-1]
+            self.download(path,tmp_name,"https://huggingface.co" + href)
+
+        folders = soup.findAll(lambda tag: tag.name == 'span' and tag.get('class') == ['truncate'])
+        for folder in folders:
+            self.get_all_dl(path + "/" + folder.text ,url + "/" + folder.text)
+        
+
+    def download(self,path,name,url):
+        """
+        It downloads a file from a url and displays a progress bar
+        
+        :param name: the name of the file to download
+        :param url: The URL of the file you want to download
+        """
+        if not exists(path):
+            mkdir(path)
+        if not exists(path + "/" + name):
+            with open(path + "/" + name, "wb") as f:
+                self.log_info("Downloading %s" % name)
+                response = requests.get(url, stream=True)
+                total_length = response.headers.get('content-length')
+
+                if total_length is None or int(total_length) < 0.1E9: # no content length header
+                    f.write(response.content)
+                else:
+                    try:
+                        nb_chunck = min(20,ceil(ceil(int(total_length))*1E-8))
+                    except Exception as e:
+                        self.log_warning(str(e))
+                        nb_chunck = 20
+                    dl = 0
+                    total_length = int(total_length)
+                    for data in response.iter_content(chunk_size=int(total_length/nb_chunck)):
+                        dl += len(data)
+                        f.write(data)
+                        done = ceil(nb_chunck * dl / total_length)
+                        self.log_info(f"[{'#' * done + ' -' * (nb_chunck-done)}] " + f"{round(dl*1E-9,2)}go/{round(total_length*1E-9,2)}go")
+            self.log_info("Download complete for " + name) 
+        else:
+            self.log_info("Existing files found for " + name)
+
+
+    def to_dict(self,request):
+        """
+        It takes a request object and returns a dictionary of all the attributes of the request object that
+        don't start with an underscore
+        
+        :param request: The request object
+        :return: A dictionary of the request object.
+        """
+        args = dict()
+        for key,value in request.__dict__.items():
+            self.log_info(str(key) + " : " +str(value))
+            if key[0] != "_":
+                args[key] = value
+        return args
+
+    def on_ml_request(self,request:MLRequest):
+        """
+        > The function takes in a request object, converts it into a dictionary, and then calls the
+        `generator` function with the dictionary as arguments
+        
+        :param request: The request object that is passed to the service
+        :type request: MLRequest
+        """
+        resp = MLResponse()
+        ret = self.generator(request.inputs)
+        resp.output = ret
+        return resp
+    
+
+
+class CrudPerson(BusinessOperation):
+
+    def on_message(self, request):
+        return 
+
+    def create_person(self,request:CreatePersonRequest):
+        """
+        > Create a new person in the database and return the new person's ID
+        
+        :param request: The request object that was passed in from the client
+        :type request: CreatePersonRequest
+        :return: The ID of the newly created person.
+        """
+
+        # sqlInsert = 'insert into Sample.Person values (?,?,?,?,?)'
+        # iris.sql.exec(sqlInsert,request.person.company,dob,request.person.name,request.person.phone,request.person.title)
+        
+        # IRIS ORM
+        person = iris.cls('Sample.Person')._New()
+        if (v:=request.person.company) is not None: person.Company = v 
+        if (v:=request.person.name) is not None: person.Name = v 
+        if (v:=request.person.phone) is not None: person.Phone = v 
+        if (v:=request.person.title) is not None: person.Title = v 
+        if (v:=request.person.dob) is not None: person.DOB = v 
+
+        Utils.raise_on_error(person._Save())
+        
+        return CreatePersonResponse(person._Id())
+
+    def update_person(self,request:UpdatePersonRequest):
+        """
+        > Update a person in the database
+        
+        :param request: The request object that will be passed to the service
+        :type request: UpdatePersonRequest
+        :return: UpdatePersonResponse()
+        """
+
+        # IRIS ORM
+        if iris.cls('Sample.Person')._ExistsId(request.id):
+            person = iris.cls('Sample.Person')._OpenId(request.id)
+            if (v:=request.person.company) is not None: person.Company = v 
+            if (v:=request.person.name) is not None: person.Name = v 
+            if (v:=request.person.phone) is not None: person.Phone = v 
+            if (v:=request.person.title) is not None: person.Title = v 
+            if (v:=request.person.dob) is not None: person.DOB = v 
+            Utils.raise_on_error(person._Save())
+        
+        return UpdatePersonResponse()
+
+    def get_person(self,request:GetPersonRequest):
+        """
+        > The function takes a `GetPersonRequest` object, executes a SQL query, and returns a
+        `GetPersonResponse` object
+        
+        :param request: The request object that is passed in
+        :type request: GetPersonRequest
+        :return: A GetPersonResponse object
+        """
+        sql_select = """
+            SELECT 
+                Company, DOB, Name, Phone, Title
+            FROM Sample.Person
+            where ID = ?
+            """
+        rs = iris.sql.exec(sql_select,request.id)
+        response = GetPersonResponse()
+        for person in rs:
+            response.person= Person(company=person[0],dob=person[1],name=person[2],phone=person[3],title=person[4])
+        return response
+
+    def get_all_person(self,request:GetAllPersonRequest):
+        """
+        > This function returns a list of all the people in the Person table
+        
+        :param request: The request object that is passed to the service
+        :type request: GetAllPersonRequest
+        :return: A list of Person objects
+        """
+
+        sql_select = """
+            SELECT 
+                Company, DOB, Name, Phone, Title
+            FROM Sample.Person
+            """
+        rs = iris.sql.exec(sql_select)
+        response = GetAllPersonResponse()
+        response.persons = list()
+        for person in rs:
+            response.persons.append(Person(company=person[0],dob=person[1],name=person[2],phone=person[3],title=person[4]))
+        return response
+    
+    def delete_person(self,request:DeletePersonRequest):
+        """
+        > Delete a person from the database
+        
+        :param request: The request object that is passed to the service
+        :type request: DeletePersonRequest
+        :return: The response is being returned.
+        """
+
+        sql_select = """
+            DELETE FROM Sample.Person as Pers
+            WHERE Pers.id = ?
+            """
+        rs = iris.sql.exec(sql_select,request.id)
+        response = DeletePersonResponse()
+        return response

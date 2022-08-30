@@ -1,0 +1,4 @@
+transformers
+spacy
+spacy-transformers
+benepar

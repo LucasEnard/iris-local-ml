@@ -275,3 +275,8 @@ Some models may require some changes for the pipeline or the settings for exampl
 # 6. Conclusion
 From here you should be able to use any model that you need or own on IRIS.<br>
 **NOTE** that you can create a `Python.MLOperation` ( Hugging face operation ) for each of your model and have them on at the same time. 
+
+
+{
+    "inputs":"Climate change is considered a hoax by many"
+}
