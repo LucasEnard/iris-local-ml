@@ -5,4 +5,4 @@ gunicorn
 beautifulsoup4
 pillow
 
-https://huggingface.co/explosion/en_healthsea/resolve/main/en_healthsea-any-py3-none-any.whl
+torch

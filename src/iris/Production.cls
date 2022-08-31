@@ -9,7 +9,7 @@ XData ProductionDefinition
   <Item Name="HuggingFace API" Category="" ClassName="Python.HFOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Host" Name="%settings"></Setting>
   </Item>
-  <Item Name="en-HealthSea SpaCy" Category="" ClassName="Python.SpacyOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="Analysis Operation" Category="" ClassName="Python.AnalysisOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Host" Name="%settings">name=en_healthsea
 model_url=https://huggingface.co/explosion/en_healthsea</Setting>
   </Item>

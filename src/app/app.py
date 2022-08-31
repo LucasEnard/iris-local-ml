@@ -1,27 +1,33 @@
-from flask import Flask, jsonify, request
-from grongier.pex import Director
-from datetime import datetime
+from turtle import back
+from flask import Flask, jsonify, request, render_template
 
-from msg import (GetAllPersonRequest,CreatePersonRequest,
-                UpdatePersonRequest,GetPersonRequest)
-from obj import Person
+# from grongier.pex import Director
+# from datetime import datetime
 
+# from msg import (GetAllPersonRequest,CreatePersonRequest,
+#                 UpdatePersonRequest,GetPersonRequest)
+# from obj import Person
+
+import pandas as pd
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud, ImageColorGenerator, STOPWORDS
 
 app = Flask(__name__)
 
-# ----------------------------------------------------------------
-### CRUD FOR Person
-# ----------------------------------------------------------------
-
 # GET Infos
 @app.route("/", methods=["GET"])
-def get_info():
-    """
-    It returns a JSON object with a single key-value pair
-    :return: A JSON object with the version number of the API.
-    """
-    info = {'version':'1.0.6'}
-    return jsonify(info)
+def get_main():
+    text_sentiment = open("src/app/static/alice29.txt").read()
+
+    background_image = np.array(Image.open('src/app/static/recycleicon.jpg'))
+    img_colors = ImageColorGenerator(background_image)
+    wc = WordCloud(background_color = 'white', mask = background_image)
+    wc.generate(text_sentiment)
+    wc.recolor(color_func = img_colors)
+    wc.to_file('src/app/static/wc.jpg')
+    return render_template("main.html", cloud_image = "static/wc.jpg")
 
 @app.route("/persons/", methods=["GET"])
 def get_all_persons():

@@ -29,6 +29,8 @@ from bs4 import BeautifulSoup as BS
 from transformers import pipeline
 
 import spacy
+import spacy_transformers
+import benepar
 
 # > This class is a business operation that receives a request from the client, sends it to the HF (Hunggin Face)
 # API, and returns the response to the client.
@@ -261,7 +263,7 @@ class MLOperation(BusinessOperation):
 
         return resp
 
-class SpacyOperation(BusinessOperation):
+class AnalysisOperation(BusinessOperation):
 
 
     def on_init(self):
@@ -272,16 +274,20 @@ class SpacyOperation(BusinessOperation):
         """
         if not hasattr(self,"path"):
             self.path = "/irisdev/app/src/model"
-        if not hasattr(self,"name"):
-            self.path = "en_healthsea"
-        if not hasattr(self,"url"):
-            self.url = "https://huggingface.co/explosion/en_healthsea"
-
 
         # Loading the model and the config from the folder.
-        self.get_all_dl(self.path + "/" + self.name,self.url + "/tree/main")
-        self.generator = spacy.load(self.path + "/" + self.name)
-        self.log_info("SpaCy model and config loaded")
+        self.get_all_dl(self.path + "/roberta_emotion","https://huggingface.co/cardiffnlp/twitter-roberta-base-emotion/tree/main")
+        self.get_all_dl(self.path + "/roberta_sentiment","https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest/tree/main")
+        self.get_all_dl(self.path + "/roberta_topic","https://huggingface.co/cardiffnlp/tweet-topic-21-multi/tree/main")
+
+        self.emotion_model = pipeline("text-classification","/irisdev/app/src/model/roberta_emotion")
+        self.log_info("Emotion analysis model and config loaded")
+
+        self.sentiment_model = pipeline("sentiment-analysis",model="/irisdev/app/src/model/roberta_sentiment",tokenizer="/irisdev/app/src/model/roberta_sentiment")
+        self.log_info("Sentiment analysis model and config loaded")
+
+        self.topic_model = pipeline("text-classification","/irisdev/app/src/model/roberta_topic")
+        self.log_info("Topic analysis model and config loaded")
 
 
     def get_all_dl(self,path,url):
@@ -356,8 +362,12 @@ class SpacyOperation(BusinessOperation):
         :type request: MLRequest
         """
         resp = MLResponse()
-        ret = self.generator(request.inputs)
-        resp.output = ret
+
+        ret_emo = self.emotion_model(request.inputs)
+        ret_top = self.topic_model(request.inputs)
+        ret_sent = self.sentiment_model(request.inputs)
+
+        resp.output = {"emotion":ret_emo,"topic":ret_top,"sentiment":ret_sent}
         return resp
     
 

@@ -280,3 +280,7 @@ From here you should be able to use any model that you need or own on IRIS.<br>
 {
     "inputs":"Climate change is considered a hoax by many"
 }
+
+{
+    "inputs":"I'm happy to tell you that it is proved that using pre-trained machine learning model can save a lot of resources"
+}
